@@ -54,49 +54,39 @@
     const puzzleEl = document.getElementById('puzzle');
     const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/raw/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg';
 
-    let tiles = [];
+    // This array holds tile indices in their current order
+    let tileOrder = [...Array(9).keys()];
     let emptyIndex = 8;
-
-    function createTiles() {
-      tiles = [];
-      for (let i = 0; i < 9; i++) {
-        if (i === 8) {
-          tiles.push(null);
-          continue;
-        }
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        const r = Math.floor(i / 3);
-        const c = i % 3;
-        tile.style.backgroundImage = `url('${imgUrl}')`;
-        tile.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
-        tile.addEventListener('click', () => tryMove(i));
-        tiles.push(tile);
-      }
-    }
 
     function render() {
       puzzleEl.innerHTML = '';
-      for (let i = 0; i < 9; i++) {
-        puzzleEl.appendChild(tiles[i] ? tiles[i] : createEmptyTile());
-      }
-    }
-
-    function createEmptyTile() {
-      const empty = document.createElement('div');
-      empty.className = 'tile empty';
-      return empty;
+      tileOrder.forEach((tileNum, i) => {
+        const div = document.createElement('div');
+        div.className = 'tile';
+        if (tileNum === 8) {
+          div.classList.add('empty');
+        } else {
+          const r = Math.floor(tileNum / 3);
+          const c = tileNum % 3;
+          div.style.backgroundImage = `url('${imgUrl}')`;
+          div.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
+          div.addEventListener('click', () => tryMove(i));
+        }
+        puzzleEl.appendChild(div);
+      });
     }
 
     function tryMove(index) {
-      const validMoves = [
-        index - 3, index + 3,
-        index % 3 !== 0 ? index - 1 : -1,
-        index % 3 !== 2 ? index + 1 : -1
+      const adjacent = [
+        index - 1, index + 1,
+        index - 3, index + 3
       ];
-
-      if (validMoves.includes(emptyIndex)) {
-        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+      if (
+        adjacent.includes(emptyIndex) &&
+        !(index % 3 === 0 && emptyIndex === index - 1) &&
+        !(index % 3 === 2 && emptyIndex === index + 1)
+      ) {
+        [tileOrder[index], tileOrder[emptyIndex]] = [tileOrder[emptyIndex], tileOrder[index]];
         emptyIndex = index;
         render();
       }
@@ -105,17 +95,19 @@
     function shuffle() {
       for (let i = 0; i < 100; i++) {
         const neighbors = [];
-        if (emptyIndex - 3 >= 0) neighbors.push(emptyIndex - 3);
-        if (emptyIndex + 3 < 9) neighbors.push(emptyIndex + 3);
         if (emptyIndex % 3 !== 0) neighbors.push(emptyIndex - 1);
         if (emptyIndex % 3 !== 2) neighbors.push(emptyIndex + 1);
+        if (emptyIndex - 3 >= 0) neighbors.push(emptyIndex - 3);
+        if (emptyIndex + 3 < 9) neighbors.push(emptyIndex + 3);
         const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
-        tryMove(rand);
+        [tileOrder[emptyIndex], tileOrder[rand]] = [tileOrder[rand], tileOrder[emptyIndex]];
+        emptyIndex = rand;
       }
+      render();
     }
 
-    createTiles();
-    render();
+    render(); // initial render
+    shuffle(); // optional shuffle on load
   </script>
 </body>
 </html>
