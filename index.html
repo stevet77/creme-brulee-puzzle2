@@ -80,16 +80,12 @@
       );
     }
 
-    function isSolved() {
-      // Check if first 8 tiles are in order 0..7 (ignores position of empty tile)
-      return tileOrder.slice(0, 8).every((val, i) => val === i);
-    }
-
     function render() {
       puzzleEl.innerHTML = '';
       tileOrder.forEach((tileNum, i) => {
         const div = document.createElement('div');
         div.className = 'tile';
+        div.dataset.index = tileNum;
         if (tileNum === 8) {
           div.classList.add('empty');
         } else {
@@ -97,17 +93,13 @@
           const c = tileNum % 3;
           div.style.backgroundImage = `url('${imgUrl}')`;
           div.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
-          div.textContent = tileNum + 1; // show tile number
+          div.textContent = tileNum + 1;
           div.addEventListener('click', () => tryMove(i));
         }
         puzzleEl.appendChild(div);
       });
 
-      if (isSolved()) {
-        messageEl.textContent = "🎉 You solved it!";
-      } else {
-        messageEl.textContent = "";
-      }
+      checkSolved();
     }
 
     function tryMove(index) {
@@ -129,6 +121,15 @@
         emptyIndex = rand;
       }
       render();
+    }
+
+    function checkSolved() {
+      const isCorrect = tileOrder.slice(0, 8).every((val, idx) => val === idx);
+      if (isCorrect) {
+        messageEl.textContent = "🎉 You solved it!";
+      } else {
+        messageEl.textContent = "";
+      }
     }
 
     render();
