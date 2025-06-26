@@ -2,13 +2,41 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Crème Brûlée Puzzle</title>
-<link rel="stylesheet" href="styles.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Crème Brûlée Puzzle Test</title>
+<style>
+  #puzzle {
+    width: 600px; height: 400px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    background: #333;
+  }
+  .tile {
+    background-size: 600px 400px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+</style>
 </head>
 <body>
-<h1>Crème Brûlée Puzzle 🍮</h1>
+<h1>Crème Brûlée Puzzle Test</h1>
 <div id="puzzle"></div>
-<script src="script.js"></script>
+
+<script>
+  const puzzleEl = document.getElementById('puzzle');
+  const imgUrl = 'https://images.unsplash.com/photo-1600891964945-556a1b9b6338?auto=format&fit=crop&w=600&h=400&q=80';
+
+  for(let r=0; r<3; r++) {
+    for(let c=0; c<3; c++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.style.backgroundImage = `url(${imgUrl})`;
+      tile.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
+      puzzleEl.appendChild(tile);
+    }
+  }
+</script>
 </body>
 </html>
