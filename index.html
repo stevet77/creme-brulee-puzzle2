@@ -28,6 +28,13 @@
       background-repeat: no-repeat;
       cursor: pointer;
       border: 1px solid #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 1px 1px 3px black;
     }
     .empty {
       background: #111;
@@ -43,20 +50,35 @@
       color: #000;
       cursor: pointer;
     }
+    #message {
+      margin-top: 15px;
+      font-size: 20px;
+      color: #0f0;
+    }
   </style>
 </head>
 <body>
   <h1>Sliding Crème Brûlée Puzzle</h1>
   <div id="puzzle"></div>
   <button onclick="shuffle()">Shuffle</button>
+  <div id="message"></div>
 
   <script>
     const puzzleEl = document.getElementById('puzzle');
+    const messageEl = document.getElementById('message');
     const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/raw/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg';
 
-    // This array holds tile indices in their current order
     let tileOrder = [...Array(9).keys()];
     let emptyIndex = 8;
+
+    function isAdjacent(i1, i2) {
+      const r1 = Math.floor(i1 / 3), c1 = i1 % 3;
+      const r2 = Math.floor(i2 / 3), c2 = i2 % 3;
+      return (
+        (r1 === r2 && Math.abs(c1 - c2) === 1) ||
+        (c1 === c2 && Math.abs(r1 - r2) === 1)
+      );
+    }
 
     function render() {
       puzzleEl.innerHTML = '';
@@ -70,22 +92,22 @@
           const c = tileNum % 3;
           div.style.backgroundImage = `url('${imgUrl}')`;
           div.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
+          div.textContent = tileNum + 1; // tile number for debugging
           div.addEventListener('click', () => tryMove(i));
         }
         puzzleEl.appendChild(div);
       });
+
+      // Check win condition
+      if (tileOrder.every((val, i) => val === i)) {
+        messageEl.textContent = "🎉 You solved it!";
+      } else {
+        messageEl.textContent = "";
+      }
     }
 
     function tryMove(index) {
-      const adjacent = [
-        index - 1, index + 1,
-        index - 3, index + 3
-      ];
-      if (
-        adjacent.includes(emptyIndex) &&
-        !(index % 3 === 0 && emptyIndex === index - 1) &&
-        !(index % 3 === 2 && emptyIndex === index + 1)
-      ) {
+      if (isAdjacent(index, emptyIndex)) {
         [tileOrder[index], tileOrder[emptyIndex]] = [tileOrder[emptyIndex], tileOrder[index]];
         emptyIndex = index;
         render();
@@ -94,20 +116,19 @@
 
     function shuffle() {
       for (let i = 0; i < 100; i++) {
-        const neighbors = [];
-        if (emptyIndex % 3 !== 0) neighbors.push(emptyIndex - 1);
-        if (emptyIndex % 3 !== 2) neighbors.push(emptyIndex + 1);
-        if (emptyIndex - 3 >= 0) neighbors.push(emptyIndex - 3);
-        if (emptyIndex + 3 < 9) neighbors.push(emptyIndex + 3);
-        const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
+        const moves = [];
+        for (let j = 0; j < 9; j++) {
+          if (isAdjacent(j, emptyIndex)) moves.push(j);
+        }
+        const rand = moves[Math.floor(Math.random() * moves.length)];
         [tileOrder[emptyIndex], tileOrder[rand]] = [tileOrder[rand], tileOrder[emptyIndex]];
         emptyIndex = rand;
       }
       render();
     }
 
-    render(); // initial render
-    shuffle(); // optional shuffle on load
+    render();
+    // shuffle(); // Uncomment if you want to start shuffled
   </script>
 </body>
 </html>
