@@ -5,9 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sliding Crème Brûlée Puzzle</title>
   <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #222;
+      color: #fff;
+    }
     #puzzle {
       width: 600px;
       height: 400px;
+      margin: 20px auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
@@ -20,47 +27,58 @@
       background-size: 600px 400px;
       background-repeat: no-repeat;
       cursor: pointer;
-      border: 1px solid #222;
+      border: 1px solid #111;
     }
     .empty {
       background: #111;
       cursor: default;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background-color: #ffcc00;
+      color: #000;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>Sliding Crème Brûlée Puzzle</h1>
   <div id="puzzle"></div>
+  <button onclick="shuffle()">Shuffle</button>
 
   <script>
     const puzzleEl = document.getElementById('puzzle');
-    const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/blob/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg?raw=true';
+    const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/raw/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg';
 
-    const tiles = [];
-    let emptyIndex = 8; // index of the empty tile
+    let tiles = [];
+    let emptyIndex = 8;
 
-    // Create 8 tiles and 1 empty space
-    for (let i = 0; i < 9; i++) {
-      const tile = document.createElement('div');
-      tile.classList.add('tile');
-
-      if (i === 8) {
-        tile.classList.add('empty');
-        tiles.push(null);
-      } else {
+    function createTiles() {
+      tiles = [];
+      for (let i = 0; i < 9; i++) {
+        if (i === 8) {
+          tiles.push(null);
+          continue;
+        }
+        const tile = document.createElement('div');
+        tile.className = 'tile';
         const r = Math.floor(i / 3);
         const c = i % 3;
         tile.style.backgroundImage = `url('${imgUrl}')`;
         tile.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
-        tiles.push(tile);
         tile.addEventListener('click', () => tryMove(i));
+        tiles.push(tile);
       }
     }
 
     function render() {
       puzzleEl.innerHTML = '';
       for (let i = 0; i < 9; i++) {
-        puzzleEl.appendChild(tiles[i] || createEmptyTile());
+        puzzleEl.appendChild(tiles[i] ? tiles[i] : createEmptyTile());
       }
     }
 
@@ -86,4 +104,18 @@
 
     function shuffle() {
       for (let i = 0; i < 100; i++) {
-        cons
+        const neighbors = [];
+        if (emptyIndex - 3 >= 0) neighbors.push(emptyIndex - 3);
+        if (emptyIndex + 3 < 9) neighbors.push(emptyIndex + 3);
+        if (emptyIndex % 3 !== 0) neighbors.push(emptyIndex - 1);
+        if (emptyIndex % 3 !== 2) neighbors.push(emptyIndex + 1);
+        const rand = neighbors[Math.floor(Math.random() * neighbors.length)];
+        tryMove(rand);
+      }
+    }
+
+    createTiles();
+    render();
+  </script>
+</body>
+</html>
