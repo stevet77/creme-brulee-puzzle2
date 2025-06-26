@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crème Brûlée Puzzle</title>
+  <title>Sliding Crème Brûlée Puzzle</title>
   <style>
     #puzzle {
       width: 600px;
@@ -19,28 +19,71 @@
       height: 133px;
       background-size: 600px 400px;
       background-repeat: no-repeat;
-      border: 1px solid #222;
       cursor: pointer;
+      border: 1px solid #222;
+    }
+    .empty {
+      background: #111;
+      cursor: default;
     }
   </style>
 </head>
 <body>
-  <h1>Crème Brûlée Puzzle</h1>
+  <h1>Sliding Crème Brûlée Puzzle</h1>
   <div id="puzzle"></div>
 
   <script>
     const puzzleEl = document.getElementById('puzzle');
     const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/blob/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg?raw=true';
 
-    for (let r = 0; r < 3; r++) {
-      for (let c = 0; c < 3; c++) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
+    const tiles = [];
+    let emptyIndex = 8; // index of the empty tile
+
+    // Create 8 tiles and 1 empty space
+    for (let i = 0; i < 9; i++) {
+      const tile = document.createElement('div');
+      tile.classList.add('tile');
+
+      if (i === 8) {
+        tile.classList.add('empty');
+        tiles.push(null);
+      } else {
+        const r = Math.floor(i / 3);
+        const c = i % 3;
         tile.style.backgroundImage = `url('${imgUrl}')`;
         tile.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
-        puzzleEl.appendChild(tile);
+        tiles.push(tile);
+        tile.addEventListener('click', () => tryMove(i));
       }
     }
-  </script>
-</body>
-</html>
+
+    function render() {
+      puzzleEl.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        puzzleEl.appendChild(tiles[i] || createEmptyTile());
+      }
+    }
+
+    function createEmptyTile() {
+      const empty = document.createElement('div');
+      empty.className = 'tile empty';
+      return empty;
+    }
+
+    function tryMove(index) {
+      const validMoves = [
+        index - 3, index + 3,
+        index % 3 !== 0 ? index - 1 : -1,
+        index % 3 !== 2 ? index + 1 : -1
+      ];
+
+      if (validMoves.includes(emptyIndex)) {
+        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+        emptyIndex = index;
+        render();
+      }
+    }
+
+    function shuffle() {
+      for (let i = 0; i < 100; i++) {
+        cons
