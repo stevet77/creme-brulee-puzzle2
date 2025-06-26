@@ -80,6 +80,11 @@
       );
     }
 
+    function isSolved() {
+      // Check if first 8 tiles are in order 0..7 (ignores position of empty tile)
+      return tileOrder.slice(0, 8).every((val, i) => val === i);
+    }
+
     function render() {
       puzzleEl.innerHTML = '';
       tileOrder.forEach((tileNum, i) => {
@@ -92,14 +97,13 @@
           const c = tileNum % 3;
           div.style.backgroundImage = `url('${imgUrl}')`;
           div.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
-          div.textContent = tileNum + 1; // tile number for debugging
+          div.textContent = tileNum + 1; // show tile number
           div.addEventListener('click', () => tryMove(i));
         }
         puzzleEl.appendChild(div);
       });
 
-      // Check win condition
-      if (tileOrder.every((val, i) => val === i)) {
+      if (isSolved()) {
         messageEl.textContent = "🎉 You solved it!";
       } else {
         messageEl.textContent = "";
@@ -128,7 +132,6 @@
     }
 
     render();
-    // shuffle(); // Uncomment if you want to start shuffled
   </script>
 </body>
 </html>
