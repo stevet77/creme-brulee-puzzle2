@@ -1,70 +1,60 @@
-const rows = 3, cols = 3;
-const imgUrl = 'https://images.unsplash.com/photo-1600891964945-556a1b9b6338?auto=format&fit=crop&w=600&h=400&q=80';
-const puzzleEl = document.getElementById('puzzle');
+<script>
+  const puzzleEl = document.getElementById('puzzle');
+  const imgUrl = 'https://github.com/stevet77/creme-brulee-puzzle2/raw/main/D83129CD-B4E8-4D88-AA6B-BA9D0B601BA2_1_105_c.jpeg';
 
-let tiles = [], first = null;
+  let tileOrder = [...Array(9).keys()];
+  let emptyIndex = 8;
 
-function init() {
-  // create tiles
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const idx = r * cols + c;
+  function isAdjacent(index1, index2) {
+    const row1 = Math.floor(index1 / 3), col1 = index1 % 3;
+    const row2 = Math.floor(index2 / 3), col2 = index2 % 3;
+    return (
+      (row1 === row2 && Math.abs(col1 - col2) === 1) ||
+      (col1 === col2 && Math.abs(row1 - row2) === 1)
+    );
+  }
+
+  function render() {
+    puzzleEl.innerHTML = '';
+    tileOrder.forEach((tileNum, i) => {
       const div = document.createElement('div');
-      div.classList.add('tile');
-      div.dataset.index = idx;
-      div.style.backgroundImage = `url(${imgUrl})`;
-      div.style.backgroundPosition = `-${c * (600/3)}px -${r * (400/3)}px`;
-      div.style.backgroundSize = '600px 400px';
-      tile = { el: div, pos: idx };
-      div.addEventListener('click', () => selectTile(tile));
-      tiles.push(tile);
+      div.className = 'tile';
+      if (tileNum === 8) {
+        div.classList.add('empty');
+      } else {
+        const r = Math.floor(tileNum / 3);
+        const c = tileNum % 3;
+        div.style.backgroundImage = `url('${imgUrl}')`;
+        div.style.backgroundPosition = `-${c * 200}px -${r * 133}px`;
+        div.addEventListener('click', () => tryMove(i));
+      }
       puzzleEl.appendChild(div);
+    });
+  }
+
+  function tryMove(index) {
+    if (isAdjacent(index, emptyIndex)) {
+      [tileOrder[index], tileOrder[emptyIndex]] = [tileOrder[emptyIndex], tileOrder[index]];
+      emptyIndex = index;
+      render();
     }
   }
+
+  function shuffle() {
+    for (let i = 0; i < 100; i++) {
+      const possibleMoves = [];
+      for (let j = 0; j < 9; j++) {
+        if (isAdjacent(j, emptyIndex)) {
+          possibleMoves.push(j);
+        }
+      }
+      const rand = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+      [tileOrder[emptyIndex], tileOrder[rand]] = [tileOrder[rand], tileOrder[emptyIndex]];
+      emptyIndex = rand;
+    }
+    render();
+  }
+
+  render();
   shuffle();
-}
-
-function shuffle() {
-  tiles.sort(() => Math.random() - 0.5);
-  tiles.forEach((t, i) => {
-    puzzleEl.appendChild(t.el);
-    t.pos = i;
-    t.el.classList.remove('correct');
-  });
-}
-
-function selectTile(tile) {
-  if (!first) {
-    first = tile;
-    tile.el.classList.add('selected');
-  } else if (first === tile) {
-    first.el.classList.remove('selected');
-    first = null;
-  } else {
-    swapTiles(first, tile);
-    first.el.classList.remove('selected');
-    first = null;
-    checkWin();
-  }
-}
-
-function swapTiles(a, b) {
-  const pi = a.pos, pj = b.pos;
-  tiles[pi] = b; tiles[pj] = a;
-  a.pos = pj; b.pos = pi;
-  puzzleEl.insertBefore(b.el, puzzleEl.children[pi]);
-  puzzleEl.insertBefore(a.el, puzzleEl.children[pj]);
-}
-
-function checkWin() {
-  let won = tiles.every((t, i) => {
-    if (t.pos === parseInt(t.el.dataset.index)) {
-      t.el.classList.add('correct');
-      return true;
-    }
-    return false;
-  });
-  if (won) setTimeout(() => alert('🎉 You Win! 🎉'), 100);
-}
-
-window.onload = init;
+</script>
